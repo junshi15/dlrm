@@ -206,6 +206,7 @@ class CriteoDataset(Dataset):
                 X_int = data["X_int"]  # continuous  feature
                 X_cat = data["X_cat"]  # categorical feature
                 y = data["y"]          # target
+                ro = data["ro"]
                 self.counts = data["counts"]
             self.m_den = X_int.shape[1]  # den_fea
             self.n_emb = len(self.counts)
@@ -223,6 +224,7 @@ class CriteoDataset(Dataset):
                 X_int[indices] = X_int
                 X_cat[indices] = X_cat
                 y[indices] = y
+                ro[indices] = ro
 
             else:
                 indices = np.array_split(indices, self.offset_per_file[1:-1])
@@ -249,14 +251,17 @@ class CriteoDataset(Dataset):
                     self.X_int = [X_int[i] for i in train_indices]
                     self.X_cat = [X_cat[i] for i in train_indices]
                     self.y = [y[i] for i in train_indices]
+                    self.ro = [ro[i] for i in train_indices]
                 elif split == 'val':
                     self.X_int = [X_int[i] for i in val_indices]
                     self.X_cat = [X_cat[i] for i in val_indices]
                     self.y = [y[i] for i in val_indices]
+                    self.ro = [ro[i] for i in val_indices]
                 elif split == 'test':
                     self.X_int = [X_int[i] for i in test_indices]
                     self.X_cat = [X_cat[i] for i in test_indices]
                     self.y = [y[i] for i in test_indices]
+                    self.ro = [ro[i] for i in test_indices]
 
             print("Split data according to indices...")
 
@@ -295,19 +300,20 @@ class CriteoDataset(Dataset):
             i = index
 
         if self.max_ind_range > 0:
-            return self.X_int[i], self.X_cat[i] % self.max_ind_range, self.y[i]
+            return self.X_int[i], self.X_cat[i] % self.max_ind_range, self.y[i], self.ro[i]
         else:
-            return self.X_int[i], self.X_cat[i], self.y[i]
+            return self.X_int[i], self.X_cat[i], self.y[i], self.ro[i]
 
-    def _default_preprocess(self, X_int, X_cat, y):
+    def _default_preprocess(self, X_int, X_cat, y, ro):
         X_int = torch.log(torch.tensor(X_int, dtype=torch.float) + 1)
         if self.max_ind_range > 0:
             X_cat = torch.tensor(X_cat % self.max_ind_range, dtype=torch.long)
         else:
             X_cat = torch.tensor(X_cat, dtype=torch.long)
         y = torch.tensor(y.astype(np.float32))
+        ro = torch.tensor(ro)
 
-        return X_int, X_cat, y
+        return X_int, X_cat, y, ro
 
     def __len__(self):
         if self.memory_map:
@@ -331,6 +337,7 @@ def collate_wrapper_criteo_offset(list_of_tuples):
     X_int = torch.log(torch.tensor(transposed_data[0], dtype=torch.float) + 1)
     X_cat = torch.tensor(transposed_data[1], dtype=torch.long)
     T = torch.tensor(transposed_data[2], dtype=torch.float32).view(-1, 1)
+    ro = torch.tensor(transposed_data[3], dtype=torch.int32).view(-1, 1)
 
     batchSize = X_cat.shape[0]
     featureCnt = X_cat.shape[1]
@@ -338,7 +345,7 @@ def collate_wrapper_criteo_offset(list_of_tuples):
     lS_i = [X_cat[:, i] for i in range(featureCnt)]
     lS_o = [torch.tensor(range(batchSize)) for _ in range(featureCnt)]
 
-    return X_int, torch.stack(lS_o), torch.stack(lS_i), T
+    return X_int, torch.stack(lS_o), torch.stack(lS_i), T, ro
 
 
 def ensure_dataset_preprocessed(args, d_path):
@@ -402,6 +409,7 @@ def collate_wrapper_criteo_length(list_of_tuples):
     X_int = torch.log(torch.tensor(transposed_data[0], dtype=torch.float) + 1)
     X_cat = torch.tensor(transposed_data[1], dtype=torch.long)
     T = torch.tensor(transposed_data[2], dtype=torch.float32).view(-1, 1)
+    ro = torch.tensor(transposed_data[3], dtype=torch.int32).view(-1, 1)
 
     batchSize = X_cat.shape[0]
     featureCnt = X_cat.shape[1]
@@ -413,7 +421,7 @@ def collate_wrapper_criteo_length(list_of_tuples):
 
     lS_l = offset_to_length_converter(lS_o, lS_i)
 
-    return X_int, lS_l, lS_i, T
+    return X_int, lS_l, lS_i, T, ro
 
 
 def make_criteo_data_and_loaders(args, offset_to_length_converter=False):

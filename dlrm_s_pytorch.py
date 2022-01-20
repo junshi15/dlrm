@@ -151,7 +151,7 @@ def loss_fn_wrap(Z, T, use_gpu, device):
 # loop below.
 def unpack_batch(b):
     # Experiment with unweighted samples
-    return b[0], b[1], b[2], b[3], torch.ones(b[3].size()), None
+    return b[0], b[1], b[2], b[3], torch.ones(b[3].size()), b[4]
 
 
 class LRPolicyScheduler(_LRScheduler):
@@ -763,13 +763,14 @@ def inference(
     if args.mlperf_logging:
         scores = []
         targets = []
+        row_nos = []
 
     for i, testBatch in enumerate(test_ld):
         # early exit if nbatches was set by the user and was exceeded
         if nbatches > 0 and i >= nbatches:
             break
 
-        X_test, lS_o_test, lS_i_test, T_test, W_test, CBPP_test = unpack_batch(
+        X_test, lS_o_test, lS_i_test, T_test, W_test, ro_test = unpack_batch(
             testBatch
         )
 
@@ -799,8 +800,10 @@ def inference(
         if args.mlperf_logging:
             S_test = Z_test.detach().cpu().numpy()  # numpy array
             T_test = T_test.detach().cpu().numpy()  # numpy array
+            ro_test = ro_test.detach().cpu().numpy()
             scores.append(S_test)
             targets.append(T_test)
+            row_nos.append(ro_test)
         else:
             with record_function("DLRM accuracy compute"):
                 # compute loss and accuracy
@@ -817,7 +820,7 @@ def inference(
         with record_function("DLRM mlperf sklearn metrics compute"):
             scores = np.concatenate(scores, axis=0)
             targets = np.concatenate(targets, axis=0)
-
+            row_nos = np.concatenate(row_nos, axis=0)
             metrics = {
                 "recall": lambda y_true, y_score: sklearn.metrics.recall_score(
                     y_true=y_true, y_pred=np.round(y_score)
@@ -834,7 +837,6 @@ def inference(
                     y_true=y_true, y_pred=np.round(y_score)
                 ),
             }
-
         validation_results = {}
         for metric_name, metric_function in metrics.items():
             validation_results[metric_name] = metric_function(targets, scores)

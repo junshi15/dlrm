@@ -151,6 +151,7 @@ def processCriteoAdData(d_path, d_file, npzfile, i, convertDicts, pre_comp_count
             X_int[X_int < 0] = 0
             # targets
             y = data["y"]
+            ro = data["ro"]
 
         np.savez_compressed(
             filename_i,
@@ -158,6 +159,7 @@ def processCriteoAdData(d_path, d_file, npzfile, i, convertDicts, pre_comp_count
             X_cat=np.transpose(X_cat_t),  # transpose of the data
             X_int=X_int,
             y=y,
+            ro=ro
         )
         print("Processed " + filename_i, end="\n")
     # sanity check (applicable only if counts have been pre-computed & are re-computed)
@@ -732,10 +734,12 @@ def concatCriteoAdData(
                     X_cat = data["X_cat"]
                     X_int = data["X_int"]
                     y = data["y"]
+                    ro = data["ro"]
                 else:
                     X_cat = np.concatenate((X_cat, data["X_cat"]))
                     X_int = np.concatenate((X_int, data["X_int"]))
                     y = np.concatenate((y, data["y"]))
+                    ro = np.concatenate((ro, data["ro"]))
             print("Loaded day:", i, "y = 1:", len(y[y == 1]), "y = 0:", len(y[y == 0]))
 
         with np.load(d_path + d_file + "_fea_count.npz") as data:
@@ -747,6 +751,7 @@ def concatCriteoAdData(
             X_cat=X_cat,
             X_int=X_int,
             y=y,
+            ro=ro,
             counts=counts,
         )
 
@@ -980,6 +985,7 @@ def getCriteoAdData(
             y = np.zeros(num_data_in_split, dtype="i4")  # 4 byte int
             X_int = np.zeros((num_data_in_split, 13), dtype="i4")  # 4 byte int
             X_cat = np.zeros((num_data_in_split, 26), dtype="i4")  # 4 byte int
+            ro = np.zeros(num_data_in_split, dtype="i4") # 4 byte int for record no.
             if sub_sample_rate == 0.0:
                 rand_u = 1.0
             else:
@@ -1001,15 +1007,17 @@ def getCriteoAdData(
                     continue
 
                 y[i] = target
+                record_no = np.int32(line[40])
+                ro[i] = record_no
                 X_int[i] = np.array(line[1:14], dtype=np.int32)
                 if max_ind_range > 0:
                     X_cat[i] = np.array(
-                        list(map(lambda x: int(x, 16) % max_ind_range, line[14:])),
+                        list(map(lambda x: int(x, 16) % max_ind_range, line[14:40])),
                         dtype=np.int32
                     )
                 else:
                     X_cat[i] = np.array(
-                        list(map(lambda x: int(x, 16), line[14:])),
+                        list(map(lambda x: int(x, 16), line[14:40])),
                         dtype=np.int32
                     )
 
@@ -1066,6 +1074,7 @@ def getCriteoAdData(
                     # X_cat=X_cat[0:i, :],
                     X_cat_t=np.transpose(X_cat[0:i, :]),  # transpose of the data
                     y=y[0:i],
+                    ro=ro[:i]
                 )
                 print("\nSaved " + npzfile + "_{0}.npz!".format(split))
 
