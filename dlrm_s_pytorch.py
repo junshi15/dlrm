@@ -756,6 +756,7 @@ def inference(
     device,
     use_gpu,
     log_iter=-1,
+    score_file_name=None
 ):
     test_accu = 0
     test_samp = 0
@@ -889,6 +890,8 @@ def inference(
             ),
             flush=True,
         )
+    if score_file_name:
+        np.savez_compressed(score_file_name, scores=scores, uid=row_nos)
     return model_metrics_dict, is_best
 
 
@@ -943,6 +946,7 @@ def run():
     parser.add_argument("--data-trace-file", type=str, default="./input/dist_emb_j.log")
     parser.add_argument("--data-set", type=str, default="kaggle")  # or terabyte
     parser.add_argument("--raw-data-file", type=str, default="")
+    parser.add_argument("--score-file", type=str, default="")
     parser.add_argument("--processed-data-file", type=str, default="")
     parser.add_argument("--data-randomize", type=str, default="total")  # or day or none
     parser.add_argument("--data-trace-enable-padding", type=bool, default=False)
@@ -1761,6 +1765,7 @@ def run():
                 test_ld,
                 device,
                 use_gpu,
+                score_file_name=args.score_file
             )
 
     # profiling
