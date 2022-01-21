@@ -964,6 +964,8 @@ def run():
     parser.add_argument("--numpy-rand-seed", type=int, default=123)
     parser.add_argument("--sync-dense-params", type=bool, default=True)
     parser.add_argument("--optimizer", type=str, default="sgd")
+    parser.add_argument('--train-days', nargs='+', type=int, default=None)
+    parser.add_argument('--test-days', nargs='+', type=int, default=None)
     parser.add_argument(
         "--dataset-multiprocessing",
         action="store_true",

@@ -60,6 +60,7 @@ class CriteoDataset(Dataset):
             pro_data="",
             memory_map=False,
             dataset_multiprocessing=False,
+            dataset_days=None
     ):
         # dataset
         # tar_fea = 1   # single target
@@ -234,34 +235,46 @@ class CriteoDataset(Dataset):
                     for i in range(len(indices) - 1):
                         indices[i] = np.random.permutation(indices[i])
                     print("Randomized indices per day ...")
-
-                train_indices = np.concatenate(indices[:-1])
-                test_indices = indices[-1]
-                test_indices, val_indices = np.array_split(test_indices, 2)
+                if dataset_days:
+                    selected = [indices[i] for i in dataset_days]
+                    days_indices = np.concatenate(selected)
+                else:
+                    train_indices = np.concatenate(indices[:-1])
+                    test_indices = indices[-1]
+                    test_indices, val_indices = np.array_split(test_indices, 2)
 
                 print("Defined %s indices..." % (split))
 
                 # randomize train data (across days)
                 if randomize == "total":
-                    train_indices = np.random.permutation(train_indices)
+                    if dataset_days and split == 'train':
+                        days_indices = np.random.permutation(days_indices)
+                    elif split == 'train':
+                        train_indices = np.random.permutation(train_indices)
                     print("Randomized indices across days ...")
 
                 # create training, validation, and test sets
-                if split == 'train':
-                    self.X_int = [X_int[i] for i in train_indices]
-                    self.X_cat = [X_cat[i] for i in train_indices]
-                    self.y = [y[i] for i in train_indices]
-                    self.ro = [ro[i] for i in train_indices]
-                elif split == 'val':
-                    self.X_int = [X_int[i] for i in val_indices]
-                    self.X_cat = [X_cat[i] for i in val_indices]
-                    self.y = [y[i] for i in val_indices]
-                    self.ro = [ro[i] for i in val_indices]
-                elif split == 'test':
-                    self.X_int = [X_int[i] for i in test_indices]
-                    self.X_cat = [X_cat[i] for i in test_indices]
-                    self.y = [y[i] for i in test_indices]
-                    self.ro = [ro[i] for i in test_indices]
+                if dataset_days:
+                    self.X_int = [X_int[i] for i in days_indices]
+                    self.X_cat = [X_cat[i] for i in days_indices]
+                    self.y = [y[i] for i in days_indices]
+                    self.ro = [ro[i] for i in days_indices]
+                else:
+                    if split == 'train':
+                        self.X_int = [X_int[i] for i in train_indices]
+                        self.X_cat = [X_cat[i] for i in train_indices]
+                        self.y = [y[i] for i in train_indices]
+                        self.ro = [ro[i] for i in train_indices]
+                    elif split == 'val':
+                        self.X_int = [X_int[i] for i in val_indices]
+                        self.X_cat = [X_cat[i] for i in val_indices]
+                        self.y = [y[i] for i in val_indices]
+                        self.ro = [ro[i] for i in val_indices]
+                    elif split == 'test':
+                        self.X_int = [X_int[i] for i in test_indices]
+                        self.X_cat = [X_cat[i] for i in test_indices]
+                        self.y = [y[i] for i in test_indices]
+                        self.ro = [ro[i] for i in test_indices]
 
             print("Split data according to indices...")
 
@@ -539,6 +552,7 @@ def make_criteo_data_and_loaders(args, offset_to_length_converter=False):
             args.processed_data_file,
             args.memory_map,
             args.dataset_multiprocessing,
+            args.train_days
         )
 
         test_data = CriteoDataset(
@@ -551,6 +565,7 @@ def make_criteo_data_and_loaders(args, offset_to_length_converter=False):
             args.processed_data_file,
             args.memory_map,
             args.dataset_multiprocessing,
+            args.test_days
         )
 
         collate_wrapper_criteo = collate_wrapper_criteo_offset
