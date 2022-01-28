@@ -1,0 +1,21 @@
+fixed_1month_1:recall 0.3468, precision 0.6514, f1 0.4526, ap 0.5795, auc 0.7863, best auc 0.7863, accuracy 78.471 %, best accuracy 0.000 %
+fixed_1month_2:recall 0.3399, precision 0.6476, f1 0.4458, ap 0.5731, auc 0.7844, best auc 0.7844, accuracy 78.445 %, best accuracy 0.000 %
+fixed_1month_3:recall 0.3514, precision 0.6472, f1 0.4555, ap 0.5769, auc 0.7877, best auc 0.7877, accuracy 78.706 %, best accuracy 0.000 %
+fixed_1month_4:recall 0.3773, precision 0.6554, f1 0.4789, ap 0.5959, auc 0.7928, best auc 0.7928, accuracy 78.392 %, best accuracy 0.000 %
+fixed_1month_5:recall 0.3628, precision 0.6444, f1 0.4642, ap 0.5812, auc 0.7895, best auc 0.7895, accuracy 78.482 %, best accuracy 0.000 %
+fixed_1month_6:recall 0.3579, precision 0.6489, f1 0.4614, ap 0.5824, auc 0.7870, best auc 0.7870, accuracy 78.297 %, best accuracy 0.000 %
+
+fixed_01:recall 0.3385, precision 0.6802, f1 0.4520, ap 0.5986, auc 0.8021, best auc 0.8021, accuracy 79.269 %, best accuracy 0.000 %
+fixed_2:recall 0.3319, precision 0.6703, f1 0.4440, ap 0.5894, auc 0.7943, best auc 0.7943, accuracy 78.795 %, best accuracy 0.000 %, 0.7950235263998187
+fixed_3:recall 0.3403, precision 0.6655, f1 0.4504, ap 0.5873, auc 0.7942, best auc 0.7942, accuracy 78.944 %, best accuracy 0.000 %, 0.7942954429237348
+fixed_4:recall 0.3624, precision 0.6727, f1 0.4711, ap 0.6048, auc 0.7986, best auc 0.7986, accuracy 78.580 %, best accuracy 0.000 %, 0.7991903552115185
+fixed_5:recall 0.3477, precision 0.6619, f1 0.4559, ap 0.5894, auc 0.7954, best auc 0.7954, accuracy 78.676 %, best accuracy 0.000 %, 0.7958590522598897
+fixed_6:recall 0.3429, precision 0.6669, f1 0.4529, ap 0.5906, auc 0.7926, best auc 0.7926, accuracy 78.488 %, best accuracy 0.000 %, 0.793293021767598
+
+slide_2:recall 0.3235, precision 0.6752, f1 0.4374, ap 0.5894, auc 0.7942, best auc 0.7942, accuracy 78.775 %, best accuracy 0.000 %
+slide_3:recall 0.3983, precision 0.6327, f1 0.4889, ap 0.5869, auc 0.7929, best auc 0.7929, accuracy 78.888 %, best accuracy 0.000 %
+slide_4:recall 0.4181, precision 0.6450, f1 0.5074, ap 0.6075, auc 0.7996, best auc 0.7996, accuracy 78.630 %, best accuracy 0.000 %
+slide_5:recall 0.3610, precision 0.6588, f1 0.4664, ap 0.5921, auc 0.7959, best auc 0.7959, accuracy 78.778 %, best accuracy 0.000 %
+slide_6:recall 0.3398, precision 0.6722, f1 0.4514, ap 0.5930, auc 0.7938, best auc 0.7938, accuracy 78.552 %, best accuracy 0.000 %
+
+feature #20
